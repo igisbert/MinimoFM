@@ -1,0 +1,56 @@
+---
+import "@fontsource/ubuntu";
+import "../styles/reset.css";
+import "../styles/styles.css";
+const description =
+  "MínimoFM: revisita todos los episodios de Mínimo de Veterano";
+
+const website = "https://www.minimofm.pages.dev/";
+---
+
+<!doctype html>
+<html lang="es">
+  <head>
+    <!-- Configuración básica -->
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- Título y descripción -->
+    <title>MínimoFM</title>
+    <meta name="description" content={description} />
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/webp" href="/favicon.webp" />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={website} />
+    <meta property="og:title" content="MínimoFM" />
+    <meta property="og:description" content={description} />
+    <meta
+      property="og:image"
+      content="https://minimofm.pages.dev/og_card.png"
+    />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="¡MínimoFM!" />
+    <meta name="twitter:description" content={description} />
+    <meta
+      name="twitter:image"
+      content="https://minimofm.pages.dev/og_card.png"
+    />
+
+    <!-- Web App -->
+    <meta name="application-name" content="MínimoFM" />
+    <meta name="theme-color" content="#fdb927" />
+
+    <!-- SEO y Rendimiento -->
+    <meta name="generator" content={Astro.generator} />
+    <meta name="robots" content="index, follow" />
+  </head>
+
+  <body>
+    <slot />
+  </body>
+</html>

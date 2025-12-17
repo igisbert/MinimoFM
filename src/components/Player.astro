@@ -1,0 +1,376 @@
+---
+
+---
+
+<section id="player-section">
+  <audio id="player" src=""></audio>
+  <div class="music-player">
+    <div class="buttons">
+      <button id="previous" class="prev-button">
+        <img src="/icons/rewind-backward-15.svg" alt="Icono de Anterior" />
+      </button>
+      <button id="play-pause" class="play-pause-button"
+        ><img src="/icons/player-play.svg" alt="Icono de Play" />
+      </button>
+      <button id="next" class="next-button">
+        <img src="/icons/rewind-forward-15.svg" alt="Icono de Siguiente" />
+      </button>
+    </div>
+    <div class="progress">
+      <input
+        id="progress-bar"
+        class="progress-bar"
+        type="range"
+        min="0"
+        step="1"
+        value="0"
+      />
+      <span id="current-time" class="current-time"> 00:00 / 00:00 </span>
+    </div>
+  </div>
+  <button id="show-now-playing" class="show-now-playing-button">
+    <img
+      src="/icons/eye.svg"
+      alt="Icono para mostrar la notificación del capítulo que suena ahora."
+    />
+  </button>
+</section>
+
+<style>
+  section {
+    position: fixed;
+    width: 100%;
+    bottom: 0;
+    height: var(--player-height);
+    background-color: var(--rosy-brown);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0 2rem;
+    border-top: 0.5rem solid var(--midnight-green);
+    transform: translateY(100%);
+    z-index: 10;
+  }
+
+  audio {
+    width: 100%;
+    border: 3px solid var(--black);
+    border-radius: 5rem;
+    box-shadow: 0px 5px 5px 0px var(--black);
+    display: none;
+  }
+
+  audio::-webkit-media-controls-panel {
+    background-color: var(--rosy-brown);
+  }
+
+  .music-player {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .buttons {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .buttons button {
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    aspect-ratio: 1;
+  }
+
+  .buttons button img {
+    width: 2.5rem;
+    stroke: var(--midnight-green);
+  }
+
+  .progress {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .progress-bar {
+    width: 100%;
+    accent-color: var(--pine-green);
+  }
+
+  .buttons button {
+    position: relative;
+    z-index: 10;
+  }
+
+  #current-time {
+    visibility: hidden;
+  }
+
+  .show-now-playing-button {
+    position: absolute;
+    top: 0rem;
+    right: 0rem;
+    padding: 0.5rem;
+    background-color: transparent;
+    color: var(--midnight-green);
+    border: none;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    aspect-ratio: 1;
+    border-radius: 50%;
+  }
+
+  .show-now-playing-button img {
+    width: 2rem;
+    stroke: var(--midnight-green);
+  }
+
+  .show-player {
+    animation: slide-in 0.5s ease-in-out both;
+  }
+
+  @keyframes slide-in {
+    from {
+      transform: translateY(100%);
+    }
+    to {
+      transform: translateY(0);
+    }
+  }
+</style>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    // Player elements
+    const player = document.getElementById("player") as HTMLAudioElement;
+    const musicPlayerControls = document.querySelector(
+      ".music-player"
+    ) as HTMLElement;
+    const progressBar = document.getElementById(
+      "progress-bar"
+    ) as HTMLInputElement;
+    const currentTimeSpan = document.getElementById(
+      "current-time"
+    ) as HTMLSpanElement;
+    const playerSection = document.getElementById(
+      "player-section"
+    ) as HTMLElement;
+    let isFirstPlay = true;
+
+    // Episode buttons
+    const episodePlayButtons = document.querySelectorAll(
+      ".play-button"
+    ) as NodeListOf<HTMLButtonElement>;
+    let currentPlayingButton: HTMLButtonElement | null = null;
+    let currentEpisodeId: string | null = null;
+
+    const getListenedEpisodes = () => {
+      return JSON.parse(localStorage.getItem("listenedEpisodes") || "[]");
+    };
+
+    const markAsListened = (id: string) => {
+      const listenedEpisodes = getListenedEpisodes();
+      if (!listenedEpisodes.includes(id)) {
+        listenedEpisodes.push(id);
+        localStorage.setItem(
+          "listenedEpisodes",
+          JSON.stringify(listenedEpisodes)
+        );
+      }
+      document.dispatchEvent(
+        new CustomEvent("episodeListened", { detail: { id: id } })
+      );
+    };
+
+    function updatePlayPauseState(isPlaying: boolean) {
+      const playPauseButton = document.getElementById(
+        "play-pause"
+      ) as HTMLButtonElement;
+      const playPauseIcon = playPauseButton.querySelector("img");
+
+      if (playPauseIcon) {
+        playPauseIcon.src = isPlaying
+          ? "/icons/player-pause.svg"
+          : "/icons/player-play.svg";
+        playPauseIcon.alt = isPlaying ? "Icono de Pausa" : "Icono de Play";
+      }
+
+      if (currentPlayingButton) {
+        const buttonIcon = currentPlayingButton.querySelector("img");
+        if (buttonIcon) {
+          buttonIcon.src = isPlaying
+            ? "/icons/player-pause.svg"
+            : "/icons/player-play.svg";
+          buttonIcon.alt = isPlaying ? "Icono de Pausa" : "Icono de Play";
+        }
+      }
+    }
+
+    function formatTime(timeInSeconds: number): string {
+      if (isNaN(timeInSeconds)) return "00:00";
+      const hours = Math.floor(timeInSeconds / 3600);
+      const minutes = Math.floor((timeInSeconds % 3600) / 60);
+      const seconds = Math.floor(timeInSeconds % 60);
+      const paddedMinutes = minutes.toString().padStart(2, "0");
+      const paddedSeconds = seconds.toString().padStart(2, "0");
+      if (hours > 0) {
+        return `${hours.toString().padStart(2, "0")}:${paddedMinutes}:${paddedSeconds}`;
+      }
+      return `${paddedMinutes}:${paddedSeconds}`;
+    }
+
+    musicPlayerControls.addEventListener("click", (event) => {
+      const target = event.target as HTMLElement;
+      const button = target.closest("button");
+      if (!button) return;
+
+      switch (button.id) {
+        case "play-pause":
+          if (!player.src) return;
+          if (player.paused) player.play();
+          else player.pause();
+          break;
+        case "previous":
+          player.currentTime -= 15;
+          break;
+        case "next":
+          player.currentTime += 15;
+          break;
+      }
+    });
+
+    episodePlayButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        const clickedButton = button;
+        const audioUrl = clickedButton.dataset.audioUrl;
+        if (!audioUrl) return;
+
+        if (currentPlayingButton === clickedButton) {
+          if (player.paused) player.play();
+          else player.pause();
+        } else {
+          player.pause();
+
+          if (currentPlayingButton) {
+            const prevButtonIcon = currentPlayingButton.querySelector("img");
+            if (prevButtonIcon) {
+              prevButtonIcon.src = "/icons/player-play.svg";
+              prevButtonIcon.alt = "Icono de Play";
+            }
+          }
+          currentPlayingButton = clickedButton;
+          currentEpisodeId = audioUrl;
+
+          const buttonIcon = currentPlayingButton.querySelector("img");
+          if (buttonIcon) {
+            buttonIcon.src = "/icons/loader.svg";
+            buttonIcon.alt = "Cargando...";
+          }
+
+          const nowPlayingTitle = document.getElementById(
+            "now-playing-title"
+          ) as HTMLElement;
+
+          nowPlayingTitle.textContent =
+            clickedButton?.parentElement?.querySelector("h3")?.textContent ||
+            "No Title";
+
+          player.src = audioUrl;
+          player.load();
+
+          // MediaSession API
+          if ('mediaSession' in navigator) {
+            navigator.mediaSession.metadata = new MediaMetadata({
+              title: nowPlayingTitle.textContent,
+              artist: 'NBA Mínimo de Veterano', // Hardcoded for now, can be dynamic if needed
+              album: 'Podcast',
+              artwork: [
+                { src: '/cover.webp', sizes: '96x96', type: 'image/webp' },
+                { src: '/cover.webp', sizes: '128x128', type: 'image/webp' },
+                { src: '/cover.webp', sizes: '192x192', type: 'image/webp' },
+                { src: '/cover.webp', sizes: '256x256', type: 'image/webp' },
+                { src: '/cover.webp', sizes: '384x384', type: 'image/webp' },
+                { src: '/cover.webp', sizes: '512x512', type: 'image/webp' },
+              ]
+            });
+
+            navigator.mediaSession.setActionHandler('play', () => { player.play(); });
+            navigator.mediaSession.setActionHandler('pause', () => { player.pause(); });
+            navigator.mediaSession.setActionHandler('seekbackward', (details) => { player.currentTime = Math.max(0, player.currentTime - (details.seekOffset || 10)); });
+            navigator.mediaSession.setActionHandler('seekforward', (details) => { player.currentTime = Math.min(player.duration, player.currentTime + (details.seekOffset || 10)); });
+            // Add more handlers as needed, e.g., 'previoustrack', 'nexttrack'
+          }
+
+          const onLoadedMetadata = () => {
+            progressBar.max = player.duration.toString();
+            const duration = formatTime(player.duration);
+            currentTimeSpan.textContent = `00:00 / ${duration}`;
+            currentTimeSpan.style.visibility = "visible";
+            player.removeEventListener("loadedmetadata", onLoadedMetadata);
+          };
+
+          const onCanPlayThrough = () => {
+            player.play();
+            player.removeEventListener("canplaythrough", onCanPlayThrough);
+          };
+
+          player.addEventListener("loadedmetadata", onLoadedMetadata);
+          player.addEventListener("canplaythrough", onCanPlayThrough);
+        }
+      });
+    });
+
+    player.addEventListener("play", () => {
+      if (isFirstPlay) {
+        playerSection.classList.add("show-player");
+        isFirstPlay = false;
+      }
+      updatePlayPauseState(true);
+      currentTimeSpan.style.visibility = "visible";
+    });
+
+    player.addEventListener("pause", () => updatePlayPauseState(false));
+
+    player.addEventListener("ended", () => {
+      if (currentEpisodeId) {
+        markAsListened(currentEpisodeId);
+      }
+      updatePlayPauseState(false);
+      currentTimeSpan.style.visibility = "hidden";
+    });
+
+    player.addEventListener("error", () => {
+      updatePlayPauseState(false);
+      currentTimeSpan.style.visibility = "hidden";
+    });
+
+    player.addEventListener("timeupdate", () => {
+      if (currentEpisodeId) {
+        const LISTENED_THRESHOLD = 0.8; // 80% of the audio played
+        if (
+          player.duration > 0 &&
+          player.currentTime / player.duration >= LISTENED_THRESHOLD
+        ) {
+          markAsListened(currentEpisodeId);
+        }
+      }
+      progressBar.value = player.currentTime.toString();
+      const currentTime = formatTime(player.currentTime);
+      const duration = formatTime(player.duration);
+      currentTimeSpan.textContent = `${currentTime} / ${duration}`;
+    });
+
+    progressBar.addEventListener("input", () => {
+      player.currentTime = parseFloat(progressBar.value);
+    });
+  });
+</script>

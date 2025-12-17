@@ -1,0 +1,274 @@
+---
+import Layout from "../layouts/Layout.astro";
+---
+
+<Layout>
+  <main>
+    <a href="/" class="back-button">Volver al reproductor</a>
+    <div id="notification-container"></div>
+    <h1>Gestiona los datos de este dispositivo</h1>
+
+    <div class="card">
+      <h2>Importar datos</h2>
+      <p>Pega el contenido de tu copia de seguridad aquí y pulsa guardar.</p>
+      <textarea
+        id="import-textarea"
+        rows="5"
+        placeholder="Pega aquí tus datos..."></textarea>
+      <button id="import-button">Guardar datos</button>
+    </div>
+
+    <div class="card">
+      <h2>Exportar datos</h2>
+      <p>
+        Pulsa el botón para generar tu copia de seguridad. Cópiala y guárdala en
+        un lugar seguro.
+      </p>
+      <button id="export-button">Generar copia de seguridad</button>
+      <div id="export-container" class="hidden">
+        <pre><code id="export-data" /></pre>
+        <button id="copy-button">Copiar</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Eliminar datos</h2>
+      <p>
+        Esta acción eliminará permanentemente el progreso de episodios
+        escuchados en este dispositivo.
+      </p>
+      <button id="delete-button" class="danger">Eliminar todos los datos</button
+      >
+      <div id="delete-confirmation" class="hidden">
+        <p>¿Estás seguro? Esta acción no se puede deshacer.</p>
+        <button id="confirm-delete-button" class="danger">Sí, eliminar</button>
+        <button id="cancel-delete-button">Cancelar</button>
+      </div>
+    </div>
+  </main>
+</Layout>
+
+<style>
+  main {
+    max-width: 800px;
+    margin: 2rem auto;
+    padding: 1rem;
+  }
+
+  .back-button {
+    display: block;
+    margin-bottom: 2rem;
+    text-align: center;
+  }
+
+  .back-button {
+    color: var(--pine-green);
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 1.5rem;
+    cursor: pointer;
+    background: var(--rosy-brown);
+    padding: 1rem 1.5rem;
+    border-radius: 1rem;
+  }
+
+  .back-button:hover {
+    text-decoration: underline;
+  }
+
+  .back-button:active {
+    transform: scale(0.95);
+    color: var(--rosy-brown);
+  }
+  .back-button:visited {
+    color: var(--pine-green);
+  }
+
+  h1 {
+    text-align: center;
+    margin-bottom: 2rem;
+    color: var(--rosy-brown);
+  }
+  .card {
+    background-color: var(--pine-green);
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+  h2 {
+    margin-top: 0;
+    color: var(--midnight-green);
+  }
+  p {
+    color: var(--midnight-green);
+  }
+  button {
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 4px;
+    background-color: var(--midnight-green);
+    color: var(--rosy-brown);
+    cursor: pointer;
+    margin-top: 0.5rem;
+  }
+  button.danger {
+    background-color: var(--rosy-brown);
+    color: var(--midnight-green);
+  }
+  textarea {
+    width: 100%;
+    padding: 0.5rem;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    margin-top: 0.5rem;
+    box-sizing: border-box;
+  }
+  pre {
+    background-color: #eee;
+    padding: 1rem;
+    border-radius: 4px;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    margin-top: 1rem;
+  }
+  .hidden {
+    display: none;
+  }
+  #delete-confirmation {
+    margin-top: 1rem;
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+  }
+  #delete-confirmation.hidden {
+    display: none;
+  }
+  #export-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  #export-container.hidden {
+    display: none;
+  }
+</style>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    // --- Elements ---
+    const importTextArea = document.getElementById(
+      "import-textarea"
+    ) as HTMLTextAreaElement;
+    const importButton = document.getElementById("import-button");
+    const exportButton = document.getElementById("export-button");
+    const exportContainer = document.getElementById("export-container");
+    const exportData = document.getElementById("export-data");
+    const copyButton = document.getElementById("copy-button");
+    const deleteButton = document.getElementById("delete-button");
+    const deleteConfirmation = document.getElementById("delete-confirmation");
+    const confirmDeleteButton = document.getElementById(
+      "confirm-delete-button"
+    );
+    const cancelDeleteButton = document.getElementById("cancel-delete-button");
+
+    // --- Notification System ---
+    const notificationContainer = document.getElementById(
+      "notification-container"
+    );
+
+    function showNotification(
+      message: string,
+      type = "success",
+      duration = 3000
+    ) {
+      if (!notificationContainer) return;
+
+      const notification = document.createElement("div");
+      notification.className = `notification ${type}`;
+      notification.textContent = message;
+
+      notificationContainer.appendChild(notification);
+
+      // Trigger the transition
+      requestAnimationFrame(() => {
+        notification.classList.add("show");
+      });
+
+      // Remove the notification after a delay
+      setTimeout(() => {
+        notification.classList.remove("show");
+        notification.addEventListener(
+          "transitionend",
+          () => {
+            notification.remove();
+          },
+          { once: true }
+        );
+      }, duration);
+    }
+
+    // --- Import ---
+    importButton?.addEventListener("click", () => {
+      const data = importTextArea.value;
+      if (!data) {
+        showNotification("El área de texto está vacía.", "error");
+        return;
+      }
+      try {
+        const parsedData = JSON.parse(data);
+        if (Array.isArray(parsedData)) {
+          localStorage.setItem("listenedEpisodes", JSON.stringify(parsedData));
+          showNotification("Datos importados correctamente.", "success");
+          importTextArea.value = "";
+        } else {
+          showNotification(
+            "Error: Los datos importados deben ser un array.",
+            "error"
+          );
+        }
+      } catch (error) {
+        showNotification(
+          "Error al procesar los datos. Asegúrate de que es un JSON válido.",
+          "error"
+        );
+      }
+    });
+
+    // --- Export ---
+    exportButton?.addEventListener("click", () => {
+      const data = localStorage.getItem("listenedEpisodes");
+      if (data && exportData && exportContainer) {
+        const formattedData = JSON.stringify(JSON.parse(data), null, 2);
+        exportData.textContent = formattedData;
+        exportContainer.classList.remove("hidden");
+      } else {
+        showNotification("No hay datos para exportar.", "error");
+      }
+    });
+
+    copyButton?.addEventListener("click", () => {
+      if (exportData?.textContent) {
+        navigator.clipboard
+          .writeText(exportData.textContent)
+          .then(() => showNotification("¡Copiado al portapapeles!", "success"))
+          .catch(() => showNotification("No se pudo copiar", "error"));
+      }
+    });
+
+    // --- Delete ---
+    deleteButton?.addEventListener("click", () => {
+      deleteConfirmation?.classList.remove("hidden");
+    });
+
+    cancelDeleteButton?.addEventListener("click", () => {
+      deleteConfirmation?.classList.add("hidden");
+    });
+
+    confirmDeleteButton?.addEventListener("click", () => {
+      localStorage.removeItem("listenedEpisodes");
+      showNotification("Datos eliminados correctamente.", "success");
+      deleteConfirmation?.classList.add("hidden");
+      exportContainer?.classList.add("hidden");
+    });
+  });
+</script>

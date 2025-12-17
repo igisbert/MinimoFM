@@ -1,0 +1,16 @@
+{
+  "name": "mdv",
+  "type": "module",
+  "version": "0.0.1",
+  "scripts": {
+    "dev": "astro dev --host",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "@fontsource/ubuntu": "^5.2.6",
+    "astro": "^5.12.0",
+    "puppeteer": "^24.14.0"
+  }
+}

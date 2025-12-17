@@ -1,0 +1,220 @@
+<section>
+  <div class="controls-container">
+    <div class="buttons-container">
+      <button id="sort" class="sort-button">
+        <img src="/icons/arrows-sort.svg" alt="Icono de Ordenar" />
+      </button>
+      <button id="listened" class="listened-button">
+        <img src="/icons/ear.svg" alt="Icono de Escuchado" />
+      </button>
+    </div>
+    <div class="search-container">
+      <input
+        id="search"
+        class="search-input"
+        type="search"
+        placeholder="Buscar"
+      />
+    </div>
+  </div>
+
+  <style>
+    section {
+      /* display: flex;
+      justify-content: center;
+      gap: 1rem;
+
+      padding: 2rem 1rem; */
+    }
+
+    .controls-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      max-width: 1600px;
+      margin: 1rem auto;
+      padding: 1.5rem 1.5rem 0;
+
+      @media (width < 400px) {
+        flex-direction: column;
+        gap: 1.5rem;
+      }
+    }
+
+    .buttons-container {
+      display: flex;
+      gap: 1rem;
+    }
+
+    .search-container {
+      display: flex;
+      gap: 1rem;
+
+      @media (width < 400px) {
+        width: 100%;
+      }
+    }
+
+    .sort-button,
+    .listened-button {
+      background: var(--pine-green);
+      border: none;
+      cursor: pointer;
+      aspect-ratio: 1;
+      border-radius: 50%;
+      transition: background-color 0.2s ease-in-out;
+    }
+
+    .sort-button img,
+    .listened-button img {
+      min-width: 2rem;
+      aspect-ratio: 1;
+    }
+
+    .search-input {
+      padding: 0.5rem;
+      border: 1px solid transparent;
+      border-radius: 0.5rem;
+      font-size: 1rem;
+      height: 44px;
+
+      @media (width < 400px) {
+        width: 100%;
+      }
+
+      &:focus {
+        outline: none;
+        border-color: var(--pine-green);
+      }
+    }
+
+    .active {
+      background-color: var(--rosy-brown);
+    }
+  </style>
+</section>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const sortButton = document.getElementById("sort") as HTMLButtonElement
+    const searchInput = document.getElementById("search") as HTMLInputElement
+    const listenedButton = document.getElementById(
+      "listened"
+    ) as HTMLButtonElement
+    const grid = document.getElementById("grid") as HTMLElement
+
+    // Store original items to filter from
+    const originalItems = Array.from(grid.children) as HTMLElement[]
+
+    let currentFilter = "all" // 'all', 'hideListened'
+    let isSortReversed = false // New state for sort button
+
+    const isListened = (audioUrl: string) => {
+      const listenedEpisodes = JSON.parse(
+        localStorage.getItem("listenedEpisodes") || "[]"
+      )
+      return listenedEpisodes.includes(audioUrl)
+    }
+
+    const applyFilters = () => {
+      let itemsToRender = [...originalItems] // Start with a copy of original items
+
+      // Apply listened filter
+      if (currentFilter === "hideListened") {
+        itemsToRender = itemsToRender.filter((item) => {
+          /* @ts-ignore */
+          const audioUrl = item.querySelector(".play-button")?.dataset.audioUrl
+          return audioUrl && !isListened(audioUrl)
+        })
+      }
+
+      // Apply search filter
+      const searchTerm = searchInput.value.toLowerCase()
+      if (searchTerm) {
+        itemsToRender = itemsToRender.filter((item) => {
+          const titleElement = item.querySelector("h3")
+          const title = titleElement
+            ? titleElement.textContent?.toLowerCase() || ""
+            : ""
+          return title.includes(searchTerm)
+        })
+      }
+
+      // Apply sort
+      if (isSortReversed) {
+        itemsToRender.reverse()
+      }
+
+      grid.innerHTML = "" // Clear current grid
+      itemsToRender.forEach((item) => grid.appendChild(item))
+
+      updateListenedButtonClass()
+      updateSortButtonClass()
+    }
+
+    const updateListenedButtonClass = () => {
+      if (currentFilter === "hideListened") {
+        listenedButton.classList.add("active")
+      } else {
+        listenedButton.classList.remove("active")
+      }
+    }
+
+    const updateSortButtonClass = () => {
+      if (isSortReversed) {
+        sortButton.classList.add("active")
+      } else {
+        sortButton.classList.remove("active")
+      }
+    }
+
+    sortButton.addEventListener("click", () => {
+      isSortReversed = !isSortReversed
+      applyFilters()
+    })
+
+    listenedButton.addEventListener("click", () => {
+      if (currentFilter === "all") {
+        currentFilter = "hideListened"
+      } else {
+        currentFilter = "all"
+      }
+      applyFilters()
+    })
+
+    // Debounce function
+    function debounce(func: Function, delay: number) {
+      let timeout: any
+      return function () {
+        // @ts-ignore
+        const context = this
+        const args = arguments
+        clearTimeout(timeout)
+        timeout = setTimeout(() => func.apply(context, args), delay)
+      }
+    }
+
+    const performSearch = (searchTerm: string) => {
+      // This function now just calls applyFilters
+      applyFilters()
+    }
+
+    searchInput.addEventListener(
+      "input",
+      debounce((event: Event) => {
+        const target = event.target as HTMLInputElement
+        performSearch(target.value)
+      }, 300)
+    ) // 300ms debounce delay
+
+    // Listen for episode listened events to re-apply filters
+    document.addEventListener("episodeListened", () => {
+      applyFilters()
+    })
+
+    // Initial application of filters (e.g., if there's a search term on load)
+    applyFilters()
+    updateListenedButtonClass()
+  })
+</script>

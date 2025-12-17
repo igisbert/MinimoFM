@@ -1,0 +1,80 @@
+---
+export interface Props {
+  title: string;
+  audioUrl: string;
+  date: string;
+}
+
+const { title, audioUrl, date } = Astro.props;
+---
+
+<aside>
+  <h3>{title}</h3>
+  <p>{date}</p>
+  <button class="play-button" data-audio-url={audioUrl}>
+    <img src="/icons/player-play.svg" alt="Icono de Play" />
+  </button>
+  <div class="listened-icon-container" data-audio-url={audioUrl}>
+    <img
+      class="listened-icon"
+      src="/icons/ear-off.svg"
+      alt="Icono de Escuchado"
+    />
+  </div>
+</aside>
+
+<style>
+  aside {
+    background: var(--pine-green);
+    color: var(--midnight-green);
+    border-radius: 0.5rem;
+    padding: 1rem;
+    position: relative;
+    box-shadow: 5px 5px 0px 0px var(--black);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  h3 {
+    margin: 0.5rem 0;
+    font-size: 1.15rem;
+  }
+
+  p {
+    opacity: 0.8;
+  }
+
+  button {
+    cursor: pointer;
+    position: absolute;
+    bottom: 1rem;
+    right: 1rem;
+    background: var(--rosy-brown);
+    border: none;
+    border-radius: 50%;
+    padding: 0.5rem;
+    font-size: 1rem;
+    font-weight: bold;
+    width: 3rem;
+    height: 3rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 5;
+  }
+
+  button img {
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+
+  .listened-icon-container {
+    opacity: 0.8;
+
+    & img {
+      width: 2rem;
+      aspect-ratio: 1;
+    }
+  }
+</style>
+

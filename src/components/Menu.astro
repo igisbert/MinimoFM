@@ -1,0 +1,77 @@
+<nav>
+  <button id="close-menu-button">
+    <img src="/icons/close.svg" alt="Icono de Close" />
+  </button>
+  <ul>
+    <li>
+      <a href="/datos"
+        >Gestiona los datos de los episodios en este dispositivo</a
+      >
+    </li>
+  </ul>
+</nav>
+
+<style>
+  nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: min(25rem, 75%);
+    border-right: 0.5rem solid var(--midnight-green);
+    height: 100lvh;
+    background-color: var(--rosy-brown);
+    z-index: 4;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2rem;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease-in-out;
+    z-index: 50;
+    padding: 6rem 3rem;
+  }
+
+  button {
+    cursor: pointer;
+    background: var(--midnight-green);
+    border: none;
+    border-radius: 50%;
+    padding: 0.5rem;
+    font-size: 1rem;
+    font-weight: bold;
+    width: 3rem;
+    height: 3rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: fixed;
+    left: 1rem;
+    top: 1.5rem;
+  }
+
+  button img {
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+
+  ul {
+    padding: 0;
+    margin: 0;
+  }
+
+  nav.is-open {
+    transform: translateX(0);
+  }
+
+  a {
+    color: var(--midnight-green);
+    text-decoration: none;
+    font-size: 1.25rem;
+    font-weight: bold;
+    text-wrap: balance;
+  }
+
+  a:hover {
+    text-decoration: underline;
+  }
+</style>

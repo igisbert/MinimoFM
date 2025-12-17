@@ -1,0 +1,74 @@
+---
+import Item from "./Item.astro";
+import data from "../data/episodes.json";
+---
+
+<section id="grid">
+  {data.map((episode) => <Item {...episode} />)}
+</section>
+
+<style>
+  section {
+    max-width: 1600px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    padding: 1.5rem;
+    gap: 1.5rem;
+    margin-bottom: var(--player-height);
+    @media (width < 800px) {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+
+<script>
+  function setupEpisodeListeners() {
+    const grid = document.getElementById("grid");
+    if (!grid) return;
+
+    const getListenedEpisodes = () => {
+      return JSON.parse(localStorage.getItem("listenedEpisodes") || "[]");
+    };
+
+    const updateIcon = (icon: HTMLImageElement, audioUrl: string) => {
+      if (getListenedEpisodes().includes(audioUrl)) {
+        icon.src = "/icons/ear.svg";
+        icon.alt = "Icono de Escuchado";
+      } else {
+        icon.src = "/icons/ear-off.svg";
+        icon.alt = "Icono de No Escuchado";
+      }
+    };
+
+    const updateAllIcons = () => {
+      const icons = grid.querySelectorAll(
+        ".listened-icon"
+      ) as NodeListOf<HTMLImageElement>;
+      icons.forEach((icon) => {
+        const container = icon.closest(".listened-icon-container");
+        const audioUrl = container?.dataset.audioUrl;
+        if (audioUrl) {
+          updateIcon(icon, audioUrl);
+        }
+      });
+    };
+
+    // Initial update
+    updateAllIcons();
+
+    // Listen for player events
+    document.addEventListener("episodeListened", (event) => {
+      const { id } = event.detail;
+      const icon = grid.querySelector(
+        `.listened-icon-container[data-audio-url="${id}"] .listened-icon`
+      );
+      if (icon) {
+        updateIcon(icon as HTMLImageElement, id);
+      }
+    });
+  }
+
+  // Wait for the DOM to be fully loaded before running the script
+  document.addEventListener("DOMContentLoaded", setupEpisodeListeners);
+</script>

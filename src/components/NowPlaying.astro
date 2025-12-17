@@ -1,0 +1,55 @@
+<div id="now-playing" class="now-playing">
+  Escuchando: <span id="now-playing-title"></span>
+</div>
+
+<style>
+  .now-playing {
+    position: fixed;
+    bottom: var(--player-height);
+    left: 0;
+    padding: 1.25rem;
+    background-color: color-mix(in srgb, var(--black), transparent 25%);
+    color: var(--midnight-green);
+    z-index: 5;
+    width: 100%;
+    opacity: 1;
+    backdrop-filter: blur(3px);
+    border-bottom: 0.25rem solid
+      color-mix(in srgb, var(--rosy-brown), transparent 25%);
+    border-top: 0.25rem solid
+      color-mix(in srgb, var(--rosy-brown), transparent 25%);
+    color: var(--rosy-brown);
+    display: none;
+    font-weight: bold;
+
+    @media (width > 800px) {
+      text-align: center;
+    }
+  }
+</style>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const nowPlaying = document.getElementById("now-playing") as HTMLElement
+    const showNowPlayingButton = document.getElementById(
+      "show-now-playing"
+    ) as HTMLButtonElement
+    const buttonIcon = showNowPlayingButton.querySelector(
+      "img"
+    ) as HTMLImageElement
+
+    showNowPlayingButton.addEventListener("click", () => {
+      const isVisible = nowPlaying.classList.contains("show-now-playing")
+
+      if (isVisible) {
+        nowPlaying.classList.remove("show-now-playing")
+        nowPlaying.classList.add("hide-now-playing")
+        buttonIcon.src = "/icons/eye.svg"
+      } else {
+        nowPlaying.classList.remove("hide-now-playing")
+        nowPlaying.classList.add("show-now-playing")
+        buttonIcon.src = "/icons/eye-closed.svg"
+      }
+    })
+  })
+</script>
