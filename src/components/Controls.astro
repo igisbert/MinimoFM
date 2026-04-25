@@ -110,11 +110,11 @@
     let currentFilter = "all" // 'all', 'hideListened'
     let isSortReversed = false // New state for sort button
 
-    const isListened = (audioUrl: string) => {
+    const isListened = (episodeId: string) => {
       const listenedEpisodes = JSON.parse(
         localStorage.getItem("listenedEpisodes") || "[]"
       )
-      return listenedEpisodes.includes(audioUrl)
+      return listenedEpisodes.includes(episodeId)
     }
 
     const applyFilters = () => {
@@ -124,8 +124,8 @@
       if (currentFilter === "hideListened") {
         itemsToRender = itemsToRender.filter((item) => {
           /* @ts-ignore */
-          const audioUrl = item.querySelector(".play-button")?.dataset.audioUrl
-          return audioUrl && !isListened(audioUrl)
+          const episodeId = item.querySelector(".play-button")?.dataset.episodeId
+          return episodeId && !isListened(episodeId)
         })
       }
 

@@ -31,8 +31,8 @@ import data from "../data/episodes.json";
       return JSON.parse(localStorage.getItem("listenedEpisodes") || "[]");
     };
 
-    const updateIcon = (icon: HTMLImageElement, audioUrl: string) => {
-      if (getListenedEpisodes().includes(audioUrl)) {
+    const updateIcon = (icon: HTMLImageElement, episodeId: string) => {
+      if (getListenedEpisodes().includes(episodeId)) {
         icon.src = "/icons/ear.svg";
         icon.alt = "Icono de Escuchado";
       } else {
@@ -46,10 +46,10 @@ import data from "../data/episodes.json";
         ".listened-icon"
       ) as NodeListOf<HTMLImageElement>;
       icons.forEach((icon) => {
-        const container = icon.closest(".listened-icon-container");
-        const audioUrl = container?.dataset.audioUrl;
-        if (audioUrl) {
-          updateIcon(icon, audioUrl);
+        const container = icon.closest(".listened-icon-container") as HTMLElement;
+        const episodeId = container?.dataset.episodeId;
+        if (episodeId) {
+          updateIcon(icon, episodeId);
         }
       });
     };
@@ -59,9 +59,9 @@ import data from "../data/episodes.json";
 
     // Listen for player events
     document.addEventListener("episodeListened", (event) => {
-      const { id } = event.detail;
+      const { id } = (event as CustomEvent).detail;
       const icon = grid.querySelector(
-        `.listened-icon-container[data-audio-url="${id}"] .listened-icon`
+        `.listened-icon-container[data-episode-id="${id}"] .listened-icon`
       );
       if (icon) {
         updateIcon(icon as HTMLImageElement, id);

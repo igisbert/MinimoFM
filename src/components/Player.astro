@@ -252,7 +252,8 @@
       button.addEventListener("click", () => {
         const clickedButton = button;
         const audioUrl = clickedButton.dataset.audioUrl;
-        if (!audioUrl) return;
+        const episodeId = clickedButton.dataset.episodeId;
+        if (!audioUrl || !episodeId) return;
 
         if (currentPlayingButton === clickedButton) {
           if (player.paused) player.play();
@@ -268,7 +269,7 @@
             }
           }
           currentPlayingButton = clickedButton;
-          currentEpisodeId = audioUrl;
+          currentEpisodeId = episodeId;
 
           const buttonIcon = currentPlayingButton.querySelector("img");
           if (buttonIcon) {

@@ -1,20 +1,21 @@
 ---
 export interface Props {
+  id: string;
   title: string;
   audioUrl: string;
   date: string;
 }
 
-const { title, audioUrl, date } = Astro.props;
+const { id, title, audioUrl, date } = Astro.props;
 ---
 
 <aside>
   <h3>{title}</h3>
   <p>{date}</p>
-  <button class="play-button" data-audio-url={audioUrl}>
+  <button class="play-button" data-audio-url={audioUrl} data-episode-id={id}>
     <img src="/icons/player-play.svg" alt="Icono de Play" />
   </button>
-  <div class="listened-icon-container" data-audio-url={audioUrl}>
+  <div class="listened-icon-container" data-episode-id={id}>
     <img
       class="listened-icon"
       src="/icons/ear-off.svg"
