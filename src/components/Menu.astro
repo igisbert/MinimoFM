@@ -9,9 +9,14 @@ import { X } from "@lucide/astro";
   </button>
   <ul>
     <li>
-      <a href="/datos">Gestiona los datos de los episodios en este dispositivo</a>
+      <a href="/datos"
+        >Gestiona los datos de los episodios en este dispositivo</a
+      >
     </li>
   </ul>
+  <footer class="menu-footer">
+    <p>Gracias por todas estas horas de conocimiento, diversión y compañía.</p>
+  </footer>
 </nav>
 
 <style>
@@ -110,6 +115,19 @@ import { X } from "@lucide/astro";
 
   a:hover {
     color: var(--accent);
+  }
+
+  .menu-footer {
+    margin-top: auto;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border-subtle);
+    color: var(--text-faint);
+    font-size: 0.85rem;
+    text-align: center;
+
+    p {
+      text-wrap: balance;
+    }
   }
 </style>
 
