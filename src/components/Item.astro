@@ -1,5 +1,13 @@
 ---
-import { Play, Pause, Ear, EarOff, Loader2 } from "@lucide/astro";
+import {
+  Play,
+  Pause,
+  Ear,
+  EarOff,
+  Loader2,
+  Bookmark,
+  BookmarkOff,
+} from "@lucide/astro";
 
 export interface Props {
   id: string;
@@ -23,6 +31,13 @@ const { id, title, audioUrl, date } = Astro.props;
     <Ear class="ear-icon" />
     <EarOff class="ear-off-icon" />
   </div>
+  <div class="bookmark-icon-container" data-episode-id={id}>
+    <button class="bookmark-button" data-episode-id={id}>
+      <!--       <Bookmark class="bookmark-icon" />
+ -->
+      <BookmarkOff class="bookmark-off-icon" />
+    </button>
+  </div>
 </aside>
 
 <style>
@@ -40,6 +55,7 @@ const { id, title, audioUrl, date } = Astro.props;
 
   h3 {
     margin: 0.5rem 0;
+    width: 95%;
     font-size: 1.15rem;
     color: var(--text-primary);
   }
@@ -49,7 +65,7 @@ const { id, title, audioUrl, date } = Astro.props;
     margin: 0.5rem 0 1rem 0rem;
   }
 
-  button {
+  .play-button {
     cursor: pointer;
     position: absolute;
     bottom: 1rem;
@@ -142,5 +158,23 @@ const { id, title, audioUrl, date } = Astro.props;
 
   .listened-icon-container.is-listened .ear-off-icon {
     display: none;
+  }
+
+  .bookmark-icon-container {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    width: 2rem;
+    aspect-ratio: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .bookmark-button {
+    cursor: pointer;
+    background-color: transparent;
+    border: 0;
+    color: var(--accent);
   }
 </style>
