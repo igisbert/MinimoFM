@@ -2,20 +2,31 @@
 import { X } from "@lucide/astro";
 ---
 
+<div class="menu-overlay"></div>
 <nav>
-  <button id="close-menu-button">
+  <button class="close-button">
     <X class="close-icon" />
   </button>
   <ul>
     <li>
-      <a href="/datos"
-        >Gestiona los datos de los episodios en este dispositivo</a
-      >
+      <a href="/datos">Gestiona los datos de los episodios en este dispositivo</a>
     </li>
   </ul>
 </nav>
 
 <style>
+  .menu-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 49;
+    opacity: 0;
+    visibility: hidden;
+    transition:
+      opacity 0.3s ease-in-out,
+      visibility 0.3s ease-in-out;
+  }
+
   nav {
     position: fixed;
     top: 0;
@@ -24,69 +35,93 @@ import { X } from "@lucide/astro";
     border-right: 1px solid var(--border-subtle);
     height: 100lvh;
     background-color: var(--bg-header);
-    z-index: 4;
+    z-index: 50;
     display: flex;
     flex-direction: column;
-    align-items: center;
     gap: 2rem;
     transform: translateX(-100%);
     transition: transform 0.3s ease-in-out;
-    z-index: 50;
-    padding: 6rem 3rem;
+    padding: 5rem 2rem 2rem;
+    overflow-y: auto;
   }
 
-  button {
+  .close-button {
     cursor: pointer;
     background: var(--bg-pill);
     border: 1px solid var(--border-subtle);
     color: var(--accent);
     border-radius: 50%;
     padding: 0.5rem;
-    font-size: 1rem;
-    font-weight: bold;
-    width: 3rem;
-    height: 3rem;
+    width: 2.5rem;
+    height: 2.5rem;
     display: flex;
     justify-content: center;
     align-items: center;
-    position: fixed;
-    left: 1rem;
-    top: 1.5rem;
+    position: absolute;
+    right: 1rem;
+    top: 1rem;
     transition:
       background-color 0.2s,
       border-color 0.2s;
   }
 
-  button:hover {
+  .close-button:hover {
     background-color: var(--bg-pill-hover);
     border-color: var(--border-hover);
   }
 
   .close-icon {
-    width: 1.5rem;
-    height: 1.5rem;
+    width: 1.25rem;
+    height: 1.25rem;
   }
 
   ul {
+    list-style: none;
     padding: 0;
     margin: 0;
+  }
+
+  li {
+    border-bottom: 1px solid var(--border-subtle);
+  }
+
+  li:last-child {
+    border-bottom: none;
   }
 
   nav.is-open {
     transform: translateX(0);
   }
 
+  nav.is-open ~ .menu-overlay {
+    opacity: 1;
+    visibility: visible;
+  }
+
   a {
+    display: block;
     color: var(--text-primary);
     text-decoration: none;
-    font-size: 1.25rem;
-    font-weight: bold;
-    text-wrap: balance;
+    font-size: 1.1rem;
+    font-weight: 500;
+    padding: 1rem 0;
     transition: color 0.2s;
   }
 
   a:hover {
     color: var(--accent);
-    text-decoration: underline;
   }
 </style>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const nav = document.querySelector("nav");
+    const overlay = document.querySelector(".menu-overlay");
+    const closeButton = document.querySelector(".close-button");
+
+    const closeMenu = () => nav?.classList.remove("is-open");
+
+    closeButton?.addEventListener("click", closeMenu);
+    overlay?.addEventListener("click", closeMenu);
+  });
+</script>

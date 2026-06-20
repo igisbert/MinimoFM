@@ -69,16 +69,10 @@ import { Menu } from "@lucide/astro";
 <script>
   document.addEventListener("DOMContentLoaded", () => {
     const menuButton = document.getElementById("menu-button");
-    const menu = document.querySelector("nav");
+    const nav = document.querySelector("nav");
 
-    if (menuButton && menu) {
-      menuButton.addEventListener("click", () => {
-        menu.classList.toggle("is-open");
-      });
-
-      menu.addEventListener("click", () => {
-        menu.classList.remove("is-open");
-      });
-    }
+    menuButton?.addEventListener("click", () => {
+      nav?.classList.toggle("is-open");
+    });
   });
 </script>
