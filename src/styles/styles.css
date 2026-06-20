@@ -41,6 +41,10 @@
   /* texto/iconos ENCIMA del acento (botón play relleno) */
 }
 
+html {
+  scrollbar-gutter: stable;
+}
+
 body {
   font-family: "Ubuntu", sans-serif;
   background-color: var(--bg-app);

@@ -27,11 +27,12 @@ import data from "../data/episodes.json";
     const grid = document.getElementById("grid");
     if (!grid) return;
 
+    // --- Listened ---
     const getListenedEpisodes = () => {
       return JSON.parse(localStorage.getItem("listenedEpisodes") || "[]");
     };
 
-    const updateIcon = (container: HTMLElement, episodeId: string) => {
+    const updateListenedIcon = (container: HTMLElement, episodeId: string) => {
       if (getListenedEpisodes().includes(episodeId)) {
         container.classList.add("is-listened");
       } else {
@@ -39,33 +40,81 @@ import data from "../data/episodes.json";
       }
     };
 
-    const updateAllIcons = () => {
+    const updateAllListenedIcons = () => {
       const containers = grid.querySelectorAll(
         ".listened-icon-container",
       ) as NodeListOf<HTMLElement>;
       containers.forEach((container) => {
         const episodeId = container.dataset.episodeId;
-        if (episodeId) {
-          updateIcon(container, episodeId);
-        }
+        if (episodeId) updateListenedIcon(container, episodeId);
       });
     };
 
-    // Initial update
-    updateAllIcons();
+    updateAllListenedIcons();
 
-    // Listen for player events
     document.addEventListener("episodeListened", (event) => {
       const { id } = (event as CustomEvent).detail;
       const container = grid.querySelector(
         `.listened-icon-container[data-episode-id="${id}"]`,
       );
-      if (container) {
-        updateIcon(container as HTMLElement, id);
+      if (container) updateListenedIcon(container as HTMLElement, id);
+    });
+
+    // --- Bookmarks ---
+    const getBookmarkedEpisodes = () => {
+      return JSON.parse(localStorage.getItem("bookmarkedEpisodes") || "[]");
+    };
+
+    const saveBookmarkedEpisodes = (episodes: string[]) => {
+      localStorage.setItem("bookmarkedEpisodes", JSON.stringify(episodes));
+    };
+
+    const updateBookmarkIcon = (container: HTMLElement, episodeId: string) => {
+      if (getBookmarkedEpisodes().includes(episodeId)) {
+        container.classList.add("is-bookmarked");
+      } else {
+        container.classList.remove("is-bookmarked");
       }
+    };
+
+    const updateAllBookmarkIcons = () => {
+      const containers = grid.querySelectorAll(
+        ".bookmark-icon-container",
+      ) as NodeListOf<HTMLElement>;
+      containers.forEach((container) => {
+        const episodeId = container.dataset.episodeId;
+        if (episodeId) updateBookmarkIcon(container, episodeId);
+      });
+    };
+
+    updateAllBookmarkIcons();
+
+    grid.addEventListener("click", (event) => {
+      const target = event.target as HTMLElement;
+      const button = target.closest(".bookmark-button") as HTMLElement | null;
+      if (!button) return;
+
+      const episodeId = button.dataset.episodeId;
+      if (!episodeId) return;
+
+      const bookmarked = getBookmarkedEpisodes();
+      const index = bookmarked.indexOf(episodeId);
+      if (index === -1) {
+        bookmarked.push(episodeId);
+      } else {
+        bookmarked.splice(index, 1);
+      }
+      saveBookmarkedEpisodes(bookmarked);
+
+      const container = grid.querySelector(
+        `.bookmark-icon-container[data-episode-id="${episodeId}"]`,
+      );
+      if (container) updateBookmarkIcon(container as HTMLElement, episodeId);
+
+      // Notify Controls to re-apply filters
+      document.dispatchEvent(new CustomEvent("bookmarkChanged"));
     });
   }
 
-  // Wait for the DOM to be fully loaded before running the script
   document.addEventListener("DOMContentLoaded", setupEpisodeListeners);
 </script>

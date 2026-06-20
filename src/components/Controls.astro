@@ -11,7 +11,7 @@ import { ArrowUpDown, Bookmark, Ear, Search } from "@lucide/astro";
       </button>
       <button id="listened" class="listened-button">
         <Ear class="btn-icon" />
-        <span>Escuchados</span>
+        <span>No escuchados</span>
       </button>
       <button id="bookmarks" class="bookmarks-button">
         <Bookmark class="btn-icon" />
@@ -184,31 +184,45 @@ import { ArrowUpDown, Bookmark, Ear, Search } from "@lucide/astro";
     const listenedButton = document.getElementById(
       "listened",
     ) as HTMLButtonElement;
+    const bookmarksButton = document.getElementById(
+      "bookmarks",
+    ) as HTMLButtonElement;
     const grid = document.getElementById("grid") as HTMLElement;
 
     // Store original items to filter from
     const originalItems = Array.from(grid.children) as HTMLElement[];
 
-    let currentFilter = "all"; // 'all', 'hideListened'
-    let isSortReversed = false; // New state for sort button
+    let currentFilter = "all"; // 'all', 'hideListened', 'showBookmarks'
+    let isSortReversed = false;
 
     const isListened = (episodeId: string) => {
-      const listenedEpisodes = JSON.parse(
+      return JSON.parse(
         localStorage.getItem("listenedEpisodes") || "[]",
-      );
-      return listenedEpisodes.includes(episodeId);
+      ).includes(episodeId);
+    };
+
+    const isBookmarked = (episodeId: string) => {
+      return JSON.parse(
+        localStorage.getItem("bookmarkedEpisodes") || "[]",
+      ).includes(episodeId);
     };
 
     const applyFilters = () => {
-      let itemsToRender = [...originalItems]; // Start with a copy of original items
+      let itemsToRender = [...originalItems];
 
-      // Apply listened filter
       if (currentFilter === "hideListened") {
         itemsToRender = itemsToRender.filter((item) => {
           const episodeId =
             /* @ts-ignore */
             item.querySelector(".play-button")?.dataset.episodeId;
           return episodeId && !isListened(episodeId);
+        });
+      } else if (currentFilter === "showBookmarks") {
+        itemsToRender = itemsToRender.filter((item) => {
+          const episodeId =
+            /* @ts-ignore */
+            item.querySelector(".play-button")?.dataset.episodeId;
+          return episodeId && isBookmarked(episodeId);
         });
       }
 
@@ -229,27 +243,22 @@ import { ArrowUpDown, Bookmark, Ear, Search } from "@lucide/astro";
         itemsToRender.reverse();
       }
 
-      grid.innerHTML = ""; // Clear current grid
+      grid.innerHTML = "";
       itemsToRender.forEach((item) => grid.appendChild(item));
 
-      updateListenedButtonClass();
-      updateSortButtonClass();
+      updateButtonClasses();
     };
 
-    const updateListenedButtonClass = () => {
-      if (currentFilter === "hideListened") {
-        listenedButton.classList.add("active");
-      } else {
-        listenedButton.classList.remove("active");
-      }
-    };
-
-    const updateSortButtonClass = () => {
-      if (isSortReversed) {
-        sortButton.classList.add("active");
-      } else {
-        sortButton.classList.remove("active");
-      }
+    const updateButtonClasses = () => {
+      listenedButton.classList.toggle(
+        "active",
+        currentFilter === "hideListened",
+      );
+      bookmarksButton.classList.toggle(
+        "active",
+        currentFilter === "showBookmarks",
+      );
+      sortButton.classList.toggle("active", isSortReversed);
     };
 
     sortButton.addEventListener("click", () => {
@@ -258,11 +267,13 @@ import { ArrowUpDown, Bookmark, Ear, Search } from "@lucide/astro";
     });
 
     listenedButton.addEventListener("click", () => {
-      if (currentFilter === "all") {
-        currentFilter = "hideListened";
-      } else {
-        currentFilter = "all";
-      }
+      currentFilter = currentFilter === "hideListened" ? "all" : "hideListened";
+      applyFilters();
+    });
+
+    bookmarksButton.addEventListener("click", () => {
+      currentFilter =
+        currentFilter === "showBookmarks" ? "all" : "showBookmarks";
       applyFilters();
     });
 
@@ -278,26 +289,19 @@ import { ArrowUpDown, Bookmark, Ear, Search } from "@lucide/astro";
       };
     }
 
-    const performSearch = (searchTerm: string) => {
-      // This function now just calls applyFilters
-      applyFilters();
-    };
-
     searchInput.addEventListener(
       "input",
       debounce((event: Event) => {
         const target = event.target as HTMLInputElement;
-        performSearch(target.value);
+        applyFilters();
       }, 300),
-    ); // 300ms debounce delay
+    );
 
-    // Listen for episode listened events to re-apply filters
-    document.addEventListener("episodeListened", () => {
-      applyFilters();
-    });
+    // Re-apply when listened or bookmark state changes
+    document.addEventListener("episodeListened", () => applyFilters());
+    document.addEventListener("bookmarkChanged", () => applyFilters());
 
-    // Initial application of filters (e.g., if there's a search term on load)
+    // Initial
     applyFilters();
-    updateListenedButtonClass();
   });
 </script>

@@ -33,8 +33,7 @@ const { id, title, audioUrl, date } = Astro.props;
   </div>
   <div class="bookmark-icon-container" data-episode-id={id}>
     <button class="bookmark-button" data-episode-id={id}>
-      <!--       <Bookmark class="bookmark-icon" />
- -->
+      <Bookmark class="bookmark-icon" />
       <BookmarkOff class="bookmark-off-icon" />
     </button>
   </div>
@@ -129,6 +128,7 @@ const { id, title, audioUrl, date } = Astro.props;
     }
   }
 
+  /* --- Listened --- */
   .listened-icon-container {
     position: relative;
     width: 2rem;
@@ -160,12 +160,11 @@ const { id, title, audioUrl, date } = Astro.props;
     display: none;
   }
 
+  /* --- Bookmark --- */
   .bookmark-icon-container {
     position: absolute;
     top: 0.5rem;
     right: 0.5rem;
-    width: 2rem;
-    aspect-ratio: 1;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -175,6 +174,33 @@ const { id, title, audioUrl, date } = Astro.props;
     cursor: pointer;
     background-color: transparent;
     border: 0;
+    padding: 0.25rem;
+    display: flex;
+    transition: transform 0.2s, filter 0.2s;
+  }
+
+  .bookmark-icon,
+  .bookmark-off-icon {
+    width: 1.25rem;
+    height: 1.25rem;
+    transition: color 0.2s;
+  }
+
+  .bookmark-icon-container .bookmark-icon {
+    display: none;
     color: var(--accent);
+  }
+
+  .bookmark-icon-container .bookmark-off-icon {
+    display: block;
+    color: var(--text-disabled);
+  }
+
+  .bookmark-icon-container.is-bookmarked .bookmark-icon {
+    display: block;
+  }
+
+  .bookmark-icon-container.is-bookmarked .bookmark-off-icon {
+    display: none;
   }
 </style>
