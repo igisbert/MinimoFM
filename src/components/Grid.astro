@@ -12,7 +12,7 @@ import data from "../data/episodes.json";
     max-width: 1600px;
     margin: 0 auto;
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
     padding: 1.5rem;
     gap: 1.5rem;
     margin-bottom: var(--player-height);
@@ -31,25 +31,22 @@ import data from "../data/episodes.json";
       return JSON.parse(localStorage.getItem("listenedEpisodes") || "[]");
     };
 
-    const updateIcon = (icon: HTMLImageElement, episodeId: string) => {
+    const updateIcon = (container: HTMLElement, episodeId: string) => {
       if (getListenedEpisodes().includes(episodeId)) {
-        icon.src = "/icons/ear.svg";
-        icon.alt = "Icono de Escuchado";
+        container.classList.add("is-listened");
       } else {
-        icon.src = "/icons/ear-off.svg";
-        icon.alt = "Icono de No Escuchado";
+        container.classList.remove("is-listened");
       }
     };
 
     const updateAllIcons = () => {
-      const icons = grid.querySelectorAll(
-        ".listened-icon"
-      ) as NodeListOf<HTMLImageElement>;
-      icons.forEach((icon) => {
-        const container = icon.closest(".listened-icon-container") as HTMLElement;
-        const episodeId = container?.dataset.episodeId;
+      const containers = grid.querySelectorAll(
+        ".listened-icon-container",
+      ) as NodeListOf<HTMLElement>;
+      containers.forEach((container) => {
+        const episodeId = container.dataset.episodeId;
         if (episodeId) {
-          updateIcon(icon, episodeId);
+          updateIcon(container, episodeId);
         }
       });
     };
@@ -60,11 +57,11 @@ import data from "../data/episodes.json";
     // Listen for player events
     document.addEventListener("episodeListened", (event) => {
       const { id } = (event as CustomEvent).detail;
-      const icon = grid.querySelector(
-        `.listened-icon-container[data-episode-id="${id}"] .listened-icon`
+      const container = grid.querySelector(
+        `.listened-icon-container[data-episode-id="${id}"]`,
       );
-      if (icon) {
-        updateIcon(icon as HTMLImageElement, id);
+      if (container) {
+        updateIcon(container as HTMLElement, id);
       }
     });
   }

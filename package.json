@@ -10,7 +10,8 @@
   },
   "dependencies": {
     "@fontsource/ubuntu": "^5.2.6",
-    "astro": "^5.12.0",
+    "@lucide/astro": "^1.21.0",
+    "astro": "^6.4.8",
     "puppeteer": "^24.14.0"
   }
 }

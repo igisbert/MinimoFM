@@ -8,23 +8,24 @@
     bottom: var(--player-height);
     left: 0;
     padding: 1.25rem;
-    background-color: color-mix(in srgb, var(--black), transparent 25%);
-    color: var(--midnight-green);
+    background-color: color-mix(in srgb, var(--bg-header), transparent 15%);
+    color: var(--text-primary);
     z-index: 5;
     width: 100%;
     opacity: 1;
     backdrop-filter: blur(3px);
-    border-bottom: 0.25rem solid
-      color-mix(in srgb, var(--rosy-brown), transparent 25%);
-    border-top: 0.25rem solid
-      color-mix(in srgb, var(--rosy-brown), transparent 25%);
-    color: var(--rosy-brown);
+    border-bottom: 1px solid var(--border-subtle);
+    border-top: 1px solid var(--border-subtle);
     display: none;
     font-weight: bold;
 
     @media (width > 800px) {
       text-align: center;
     }
+  }
+
+  #now-playing-title {
+    color: var(--accent);
   }
 </style>
 
@@ -34,9 +35,6 @@
     const showNowPlayingButton = document.getElementById(
       "show-now-playing"
     ) as HTMLButtonElement
-    const buttonIcon = showNowPlayingButton.querySelector(
-      "img"
-    ) as HTMLImageElement
 
     showNowPlayingButton.addEventListener("click", () => {
       const isVisible = nowPlaying.classList.contains("show-now-playing")
@@ -44,11 +42,11 @@
       if (isVisible) {
         nowPlaying.classList.remove("show-now-playing")
         nowPlaying.classList.add("hide-now-playing")
-        buttonIcon.src = "/icons/eye.svg"
+        showNowPlayingButton.classList.remove("active")
       } else {
         nowPlaying.classList.remove("hide-now-playing")
         nowPlaying.classList.add("show-now-playing")
-        buttonIcon.src = "/icons/eye-closed.svg"
+        showNowPlayingButton.classList.add("active")
       }
     })
   })

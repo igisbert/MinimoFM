@@ -1,4 +1,6 @@
 ---
+import { Play, Pause, Ear, EarOff, Loader2 } from "@lucide/astro";
+
 export interface Props {
   id: string;
   title: string;
@@ -13,36 +15,38 @@ const { id, title, audioUrl, date } = Astro.props;
   <h3>{title}</h3>
   <p>{date}</p>
   <button class="play-button" data-audio-url={audioUrl} data-episode-id={id}>
-    <img src="/icons/player-play.svg" alt="Icono de Play" />
+    <Play class="play-icon" />
+    <Pause class="pause-icon" />
+    <Loader2 class="loader-icon" />
   </button>
   <div class="listened-icon-container" data-episode-id={id}>
-    <img
-      class="listened-icon"
-      src="/icons/ear-off.svg"
-      alt="Icono de Escuchado"
-    />
+    <Ear class="ear-icon" />
+    <EarOff class="ear-off-icon" />
   </div>
 </aside>
 
 <style>
   aside {
-    background: var(--pine-green);
-    color: var(--midnight-green);
+    background: var(--bg-card);
+    color: var(--text-secondary);
+    border: 1px solid var(--border-subtle);
     border-radius: 0.5rem;
     padding: 1rem;
     position: relative;
-    box-shadow: 5px 5px 0px 0px var(--black);
     display: flex;
     flex-direction: column;
     justify-content: space-between;
   }
+
   h3 {
     margin: 0.5rem 0;
     font-size: 1.15rem;
+    color: var(--text-primary);
   }
 
   p {
-    opacity: 0.8;
+    color: var(--text-faint);
+    margin: 0.5rem 0 1rem 0rem;
   }
 
   button {
@@ -50,7 +54,7 @@ const { id, title, audioUrl, date } = Astro.props;
     position: absolute;
     bottom: 1rem;
     right: 1rem;
-    background: var(--rosy-brown);
+    background: var(--accent);
     border: none;
     border-radius: 50%;
     padding: 0.5rem;
@@ -62,20 +66,81 @@ const { id, title, audioUrl, date } = Astro.props;
     justify-content: center;
     align-items: center;
     z-index: 5;
+    transition:
+      transform 0.2s,
+      filter 0.2s;
   }
 
-  button img {
+  button:hover {
+    transform: scale(1.05);
+    filter: brightness(1.1);
+  }
+
+  .play-icon,
+  .pause-icon,
+  .loader-icon {
     width: 1.5rem;
     height: 1.5rem;
+    color: var(--accent-on);
+  }
+
+  .play-button .pause-icon,
+  .play-button .loader-icon {
+    display: none;
+  }
+
+  .play-button.playing .play-icon {
+    display: none;
+  }
+
+  .play-button.playing .pause-icon {
+    display: block;
+  }
+
+  .play-button.loading .play-icon,
+  .play-button.loading .pause-icon {
+    display: none;
+  }
+
+  .play-button.loading .loader-icon {
+    display: block;
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
   }
 
   .listened-icon-container {
-    opacity: 0.8;
+    position: relative;
+    width: 2rem;
+    height: 2rem;
+  }
 
-    & img {
-      width: 2rem;
-      aspect-ratio: 1;
-    }
+  .ear-icon,
+  .ear-off-icon {
+    width: 2rem;
+    height: 2rem;
+    transition: color 0.2s;
+  }
+
+  .listened-icon-container .ear-icon {
+    display: none;
+    color: var(--accent);
+  }
+
+  .listened-icon-container .ear-off-icon {
+    display: block;
+    color: var(--text-disabled);
+  }
+
+  .listened-icon-container.is-listened .ear-icon {
+    display: block;
+  }
+
+  .listened-icon-container.is-listened .ear-off-icon {
+    display: none;
   }
 </style>
-

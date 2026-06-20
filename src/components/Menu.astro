@@ -1,6 +1,10 @@
+---
+import { X } from "@lucide/astro";
+---
+
 <nav>
   <button id="close-menu-button">
-    <img src="/icons/close.svg" alt="Icono de Close" />
+    <X class="close-icon" />
   </button>
   <ul>
     <li>
@@ -17,9 +21,9 @@
     top: 0;
     left: 0;
     width: min(25rem, 75%);
-    border-right: 0.5rem solid var(--midnight-green);
+    border-right: 1px solid var(--border-subtle);
     height: 100lvh;
-    background-color: var(--rosy-brown);
+    background-color: var(--bg-header);
     z-index: 4;
     display: flex;
     flex-direction: column;
@@ -33,8 +37,9 @@
 
   button {
     cursor: pointer;
-    background: var(--midnight-green);
-    border: none;
+    background: var(--bg-pill);
+    border: 1px solid var(--border-subtle);
+    color: var(--accent);
     border-radius: 50%;
     padding: 0.5rem;
     font-size: 1rem;
@@ -47,9 +52,17 @@
     position: fixed;
     left: 1rem;
     top: 1.5rem;
+    transition:
+      background-color 0.2s,
+      border-color 0.2s;
   }
 
-  button img {
+  button:hover {
+    background-color: var(--bg-pill-hover);
+    border-color: var(--border-hover);
+  }
+
+  .close-icon {
     width: 1.5rem;
     height: 1.5rem;
   }
@@ -64,14 +77,16 @@
   }
 
   a {
-    color: var(--midnight-green);
+    color: var(--text-primary);
     text-decoration: none;
     font-size: 1.25rem;
     font-weight: bold;
     text-wrap: balance;
+    transition: color 0.2s;
   }
 
   a:hover {
+    color: var(--accent);
     text-decoration: underline;
   }
 </style>

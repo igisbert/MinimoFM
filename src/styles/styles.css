@@ -4,17 +4,83 @@
   --pine-green: #247c6d;
   --midnight-green: #031c26;
   --black: #010d12;
+  /* new */
+  /* Fondos */
+  --bg-app: #15130F;
+  /* fondo general de la página */
+  --bg-header: #1C1A15;
+  /* header y player (mismo tono) */
+  --bg-card: #1F1C16;
+  /* fondo de las cards de episodio */
+  --bg-pill: #1F1C16;
+  /* fondo de toolbar/search/sort */
+  --bg-pill-hover: #26231C;
+
+  /* Bordes */
+  --border-subtle: #2E2B23;
+  /* borde de cards, pills, separadores */
+  --border-hover: #3A352A;
+  /* borde al hacer hover/focus */
+
+  /* Texto */
+  --text-primary: #F2EDE2;
+  /* títulos, texto principal */
+  --text-secondary: #D8D2C4;
+  /* texto de pills/labels activos */
+  --text-muted: #A89E89;
+  /* metadata, iconos secundarios */
+  --text-faint: #a59a82;
+  /* fechas, placeholders, iconos inactivos */
+  --text-disabled: #5C5648;
+  /* iconos muy secundarios (ej. "no escuchado" inactivo) */
+
+  /* Acento único */
+  --accent: #D9A05B;
+  /* play, progreso, sort activo, hover de acento */
+  --accent-on: #1C1A15;
+  /* texto/iconos ENCIMA del acento (botón play relleno) */
 }
 
 body {
   font-family: "Ubuntu", sans-serif;
-  background-color: var(--midnight-green);
+  background-color: var(--bg-app);
+  color: var(--text-primary);
+}
+
+/* Icon filters to colorize SVG images dynamically to match the color palette */
+.icon-text-primary {
+  filter: brightness(0) saturate(100%) invert(98%) sepia(3%) saturate(563%) hue-rotate(320deg) brightness(102%) contrast(91%);
+}
+
+.icon-text-secondary {
+  filter: brightness(0) saturate(100%) invert(92%) sepia(7%) saturate(347%) hue-rotate(338deg) brightness(97%) contrast(89%);
+}
+
+.icon-text-muted {
+  filter: brightness(0) saturate(100%) invert(69%) sepia(11%) saturate(449%) hue-rotate(343deg) brightness(87%) contrast(85%);
+}
+
+.icon-text-faint {
+  filter: brightness(0) saturate(100%) invert(49%) sepia(11%) saturate(518%) hue-rotate(343deg) brightness(93%) contrast(87%);
+}
+
+.icon-text-disabled {
+  filter: brightness(0) saturate(100%) invert(35%) sepia(10%) saturate(504%) hue-rotate(343deg) brightness(96%) contrast(86%);
+}
+
+.icon-accent {
+  filter: brightness(0) saturate(100%) invert(73%) sepia(45%) saturate(735%) hue-rotate(336deg) brightness(92%) contrast(87%);
+}
+
+.icon-accent-on {
+  filter: brightness(0) saturate(100%) invert(8%) sepia(5%) saturate(1048%) hue-rotate(342deg) brightness(97%) contrast(94%);
 }
 
 @keyframes show-now-playing {
   from {
     transform: translateY(100%);
   }
+
   to {
     transform: translateY(0);
   }
@@ -24,6 +90,7 @@ body {
   from {
     transform: translateY(0);
   }
+
   to {
     transform: translateY(100%);
   }
@@ -47,7 +114,8 @@ body {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-  pointer-events: none; /* Allow clicks to pass through */
+  pointer-events: none;
+  /* Allow clicks to pass through */
 }
 
 .notification {
@@ -56,7 +124,8 @@ body {
   color: white;
   font-weight: bold;
   opacity: 0;
-  transform: translateY(-20px); /* Start slightly above */
+  transform: translateY(-20px);
+  /* Start slightly above */
   transition: opacity 0.3s ease-out, transform 0.3s ease-out;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }

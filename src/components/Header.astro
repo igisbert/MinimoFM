@@ -1,15 +1,20 @@
+---
+import { Menu } from "@lucide/astro";
+---
+
 <header>
   <button id="menu-button">
-    <img src="/icons/menu.svg" alt="Icono de Menu" />
+    <Menu class="menu-icon" />
   </button>
-  <h1>MínimoFM</h1>
+  <h1>Mínimo<span class="accent">FM</span></h1>
   <span></span>
 </header>
 
 <style>
   header {
     padding: 1.5rem 1rem;
-    background-color: var(--pine-green);
+    background-color: var(--bg-header);
+    border-bottom: 1px solid var(--border-subtle);
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -17,17 +22,20 @@
   h1 {
     text-align: center;
     margin: 0;
-    color: var(--rosy-brown);
-    text-shadow: 0px 0px 20px
-      color-mix(in srgb, var(--midnight-green), transparent 50%);
+    color: var(--text-primary);
     font-weight: bold;
     font-size: 2.5rem;
   }
 
+  .accent {
+    color: var(--accent);
+    text-shadow: 0 0 20px var(--accent);
+  }
+
   button {
     cursor: pointer;
-    background: var(--rosy-brown);
-    border: none;
+    background: var(--bg-pill);
+    border: 1px solid var(--border-subtle);
     border-radius: 50%;
     padding: 0.5rem;
     font-size: 1rem;
@@ -37,12 +45,20 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    /* z-index: 100; */
+    transition:
+      background-color 0.2s,
+      border-color 0.2s;
   }
 
-  button img {
+  button:hover {
+    background-color: var(--bg-pill-hover);
+    border-color: var(--border-hover);
+  }
+
+  .menu-icon {
     width: 1.5rem;
     height: 1.5rem;
+    color: var(--accent);
   }
 
   span {

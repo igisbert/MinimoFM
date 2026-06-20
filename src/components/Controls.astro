@@ -1,20 +1,33 @@
+---
+import { ArrowUpDown, Bookmark, Ear, Search } from "@lucide/astro";
+---
+
 <section>
   <div class="controls-container">
     <div class="buttons-container">
       <button id="sort" class="sort-button">
-        <img src="/icons/arrows-sort.svg" alt="Icono de Ordenar" />
+        <ArrowUpDown class="btn-icon" />
+        <span>Ordenar</span>
       </button>
       <button id="listened" class="listened-button">
-        <img src="/icons/ear.svg" alt="Icono de Escuchado" />
+        <Ear class="btn-icon" />
+        <span>Escuchados</span>
+      </button>
+      <button id="bookmarks" class="bookmarks-button">
+        <Bookmark class="btn-icon" />
+        <span>Guardados</span>
       </button>
     </div>
     <div class="search-container">
-      <input
-        id="search"
-        class="search-input"
-        type="search"
-        placeholder="Buscar"
-      />
+      <search class="search-wrapper">
+        <Search class="search-icon" />
+        <input
+          id="search"
+          class="search-input"
+          type="search"
+          placeholder="Buscar"
+        />
+      </search>
     </div>
   </div>
 
@@ -36,185 +49,255 @@
       margin: 1rem auto;
       padding: 1.5rem 1.5rem 0;
 
-      @media (width < 400px) {
+      @media (width < 700px) {
         flex-direction: column;
-        gap: 1.5rem;
+        align-items: stretch;
+        gap: 1rem;
       }
     }
 
     .buttons-container {
       display: flex;
       gap: 1rem;
+
+      @media (width < 750px) {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0.5rem;
+        width: 100%;
+        height: fit-content;
+      }
     }
 
     .search-container {
       display: flex;
       gap: 1rem;
 
-      @media (width < 400px) {
+      @media (width < 750px) {
         width: 100%;
       }
+    }
+
+    .search-wrapper {
+      display: flex;
+      align-items: center;
+      background: var(--bg-pill);
+      border: 1px solid var(--border-subtle);
+      border-radius: 2rem;
+      padding-left: 1rem;
+      width: 300px;
+      height: 44px;
+      transition:
+        border-color 0.2s ease-in-out,
+        background-color 0.2s ease-in-out;
+
+      @media (width < 700px) {
+        width: 100%;
+      }
+    }
+
+    .search-wrapper:focus-within {
+      border-color: var(--border-hover);
+      background-color: var(--bg-pill-hover);
+    }
+
+    .search-icon {
+      width: 1.25rem;
+      height: 1.25rem;
+      color: var(--text-faint);
+      flex-shrink: 0;
     }
 
     .sort-button,
-    .listened-button {
-      background: var(--pine-green);
-      border: none;
+    .listened-button,
+    .bookmarks-button {
+      background: var(--bg-pill);
+      border: 1px solid var(--border-subtle);
       cursor: pointer;
-      aspect-ratio: 1;
-      border-radius: 50%;
-      transition: background-color 0.2s ease-in-out;
+      border-radius: 2rem;
+      padding: 0 1.5rem;
+      height: 44px;
+      transition:
+        background-color 0.2s ease-in-out,
+        border-color 0.2s ease-in-out;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 0.5rem;
+      font-family: inherit;
+      font-weight: bold;
+      color: var(--accent);
+
+      @media (width < 750px) {
+        padding: 0 0.4rem;
+        font-size: 0.7rem;
+      }
     }
 
-    .sort-button img,
-    .listened-button img {
-      min-width: 2rem;
-      aspect-ratio: 1;
+    .sort-button:hover,
+    .listened-button:hover,
+    .bookmarks-button:hover {
+      background-color: var(--bg-pill-hover);
+      border-color: var(--border-hover);
+    }
+
+    .btn-icon {
+      width: 1.25rem;
+      height: 1.25rem;
     }
 
     .search-input {
-      padding: 0.5rem;
-      border: 1px solid transparent;
-      border-radius: 0.5rem;
+      padding: 0.5rem 1rem 0.5rem 0.5rem;
+      background: transparent;
+      border: none;
       font-size: 1rem;
       height: 44px;
-
-      @media (width < 400px) {
-        width: 100%;
-      }
+      color: var(--text-primary);
+      width: 100%;
 
       &:focus {
         outline: none;
-        border-color: var(--pine-green);
+      }
+
+      &::placeholder {
+        color: var(--text-faint);
+        opacity: 1;
       }
     }
 
     .active {
-      background-color: var(--rosy-brown);
+      background-color: var(--accent) !important;
+      border-color: var(--accent) !important;
+      color: var(--accent-on) !important;
+    }
+
+    .active .btn-icon {
+      color: var(--accent-on) !important;
     }
   </style>
 </section>
 
 <script>
   document.addEventListener("DOMContentLoaded", () => {
-    const sortButton = document.getElementById("sort") as HTMLButtonElement
-    const searchInput = document.getElementById("search") as HTMLInputElement
+    const sortButton = document.getElementById("sort") as HTMLButtonElement;
+    const searchInput = document.getElementById("search") as HTMLInputElement;
     const listenedButton = document.getElementById(
-      "listened"
-    ) as HTMLButtonElement
-    const grid = document.getElementById("grid") as HTMLElement
+      "listened",
+    ) as HTMLButtonElement;
+    const grid = document.getElementById("grid") as HTMLElement;
 
     // Store original items to filter from
-    const originalItems = Array.from(grid.children) as HTMLElement[]
+    const originalItems = Array.from(grid.children) as HTMLElement[];
 
-    let currentFilter = "all" // 'all', 'hideListened'
-    let isSortReversed = false // New state for sort button
+    let currentFilter = "all"; // 'all', 'hideListened'
+    let isSortReversed = false; // New state for sort button
 
     const isListened = (episodeId: string) => {
       const listenedEpisodes = JSON.parse(
-        localStorage.getItem("listenedEpisodes") || "[]"
-      )
-      return listenedEpisodes.includes(episodeId)
-    }
+        localStorage.getItem("listenedEpisodes") || "[]",
+      );
+      return listenedEpisodes.includes(episodeId);
+    };
 
     const applyFilters = () => {
-      let itemsToRender = [...originalItems] // Start with a copy of original items
+      let itemsToRender = [...originalItems]; // Start with a copy of original items
 
       // Apply listened filter
       if (currentFilter === "hideListened") {
         itemsToRender = itemsToRender.filter((item) => {
-          /* @ts-ignore */
-          const episodeId = item.querySelector(".play-button")?.dataset.episodeId
-          return episodeId && !isListened(episodeId)
-        })
+          const episodeId =
+            /* @ts-ignore */
+            item.querySelector(".play-button")?.dataset.episodeId;
+          return episodeId && !isListened(episodeId);
+        });
       }
 
       // Apply search filter
-      const searchTerm = searchInput.value.toLowerCase()
+      const searchTerm = searchInput.value.toLowerCase();
       if (searchTerm) {
         itemsToRender = itemsToRender.filter((item) => {
-          const titleElement = item.querySelector("h3")
+          const titleElement = item.querySelector("h3");
           const title = titleElement
             ? titleElement.textContent?.toLowerCase() || ""
-            : ""
-          return title.includes(searchTerm)
-        })
+            : "";
+          return title.includes(searchTerm);
+        });
       }
 
       // Apply sort
       if (isSortReversed) {
-        itemsToRender.reverse()
+        itemsToRender.reverse();
       }
 
-      grid.innerHTML = "" // Clear current grid
-      itemsToRender.forEach((item) => grid.appendChild(item))
+      grid.innerHTML = ""; // Clear current grid
+      itemsToRender.forEach((item) => grid.appendChild(item));
 
-      updateListenedButtonClass()
-      updateSortButtonClass()
-    }
+      updateListenedButtonClass();
+      updateSortButtonClass();
+    };
 
     const updateListenedButtonClass = () => {
       if (currentFilter === "hideListened") {
-        listenedButton.classList.add("active")
+        listenedButton.classList.add("active");
       } else {
-        listenedButton.classList.remove("active")
+        listenedButton.classList.remove("active");
       }
-    }
+    };
 
     const updateSortButtonClass = () => {
       if (isSortReversed) {
-        sortButton.classList.add("active")
+        sortButton.classList.add("active");
       } else {
-        sortButton.classList.remove("active")
+        sortButton.classList.remove("active");
       }
-    }
+    };
 
     sortButton.addEventListener("click", () => {
-      isSortReversed = !isSortReversed
-      applyFilters()
-    })
+      isSortReversed = !isSortReversed;
+      applyFilters();
+    });
 
     listenedButton.addEventListener("click", () => {
       if (currentFilter === "all") {
-        currentFilter = "hideListened"
+        currentFilter = "hideListened";
       } else {
-        currentFilter = "all"
+        currentFilter = "all";
       }
-      applyFilters()
-    })
+      applyFilters();
+    });
 
     // Debounce function
     function debounce(func: Function, delay: number) {
-      let timeout: any
+      let timeout: any;
       return function () {
         // @ts-ignore
-        const context = this
-        const args = arguments
-        clearTimeout(timeout)
-        timeout = setTimeout(() => func.apply(context, args), delay)
-      }
+        const context = this;
+        const args = arguments;
+        clearTimeout(timeout);
+        timeout = setTimeout(() => func.apply(context, args), delay);
+      };
     }
 
     const performSearch = (searchTerm: string) => {
       // This function now just calls applyFilters
-      applyFilters()
-    }
+      applyFilters();
+    };
 
     searchInput.addEventListener(
       "input",
       debounce((event: Event) => {
-        const target = event.target as HTMLInputElement
-        performSearch(target.value)
-      }, 300)
-    ) // 300ms debounce delay
+        const target = event.target as HTMLInputElement;
+        performSearch(target.value);
+      }, 300),
+    ); // 300ms debounce delay
 
     // Listen for episode listened events to re-apply filters
     document.addEventListener("episodeListened", () => {
-      applyFilters()
-    })
+      applyFilters();
+    });
 
     // Initial application of filters (e.g., if there's a search term on load)
-    applyFilters()
-    updateListenedButtonClass()
-  })
+    applyFilters();
+    updateListenedButtonClass();
+  });
 </script>

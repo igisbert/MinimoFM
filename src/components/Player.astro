@@ -1,5 +1,5 @@
 ---
-
+import { Play, Pause, RotateCcw, RotateCw, Eye, EyeOff } from "@lucide/astro";
 ---
 
 <section id="player-section">
@@ -7,13 +7,14 @@
   <div class="music-player">
     <div class="buttons">
       <button id="previous" class="prev-button">
-        <img src="/icons/rewind-backward-15.svg" alt="Icono de Anterior" />
+        <RotateCcw class="player-icon" />
       </button>
-      <button id="play-pause" class="play-pause-button"
-        ><img src="/icons/player-play.svg" alt="Icono de Play" />
+      <button id="play-pause" class="play-pause-button">
+        <Play class="play-icon" />
+        <Pause class="pause-icon" />
       </button>
       <button id="next" class="next-button">
-        <img src="/icons/rewind-forward-15.svg" alt="Icono de Siguiente" />
+        <RotateCw class="player-icon" />
       </button>
     </div>
     <div class="progress">
@@ -29,10 +30,8 @@
     </div>
   </div>
   <button id="show-now-playing" class="show-now-playing-button">
-    <img
-      src="/icons/eye.svg"
-      alt="Icono para mostrar la notificación del capítulo que suena ahora."
-    />
+    <Eye class="eye-icon" />
+    <EyeOff class="eye-off-icon" />
   </button>
 </section>
 
@@ -42,26 +41,26 @@
     width: 100%;
     bottom: 0;
     height: var(--player-height);
-    background-color: var(--rosy-brown);
+    background-color: var(--bg-header);
     display: flex;
     justify-content: center;
     align-items: center;
     padding: 0 2rem;
-    border-top: 0.5rem solid var(--midnight-green);
+    border-top: 1px solid var(--border-subtle);
     transform: translateY(100%);
     z-index: 10;
   }
 
   audio {
     width: 100%;
-    border: 3px solid var(--black);
+    border: 1px solid var(--border-subtle);
     border-radius: 5rem;
-    box-shadow: 0px 5px 5px 0px var(--black);
+    box-shadow: 0px 5px 5px 0px rgba(0, 0, 0, 0.2);
     display: none;
   }
 
   audio::-webkit-media-controls-panel {
-    background-color: var(--rosy-brown);
+    background-color: var(--bg-header);
   }
 
   .music-player {
@@ -86,11 +85,44 @@
     justify-content: center;
     align-items: center;
     aspect-ratio: 1;
+    transition:
+      transform 0.2s,
+      filter 0.2s;
   }
 
-  .buttons button img {
+  .buttons button:hover {
+    transform: scale(1.1);
+  }
+
+  .player-icon,
+  .play-icon,
+  .pause-icon {
     width: 2.5rem;
-    stroke: var(--midnight-green);
+    height: 2.5rem;
+    color: var(--accent);
+    transition: color 0.2s;
+  }
+
+  .play-pause-button .play-icon {
+    color: var(--accent);
+  }
+
+  .play-pause-button .pause-icon {
+    display: none;
+    color: var(--accent);
+  }
+
+  .play-pause-button.playing .play-icon {
+    display: none;
+  }
+
+  .play-pause-button.playing .pause-icon {
+    display: block;
+  }
+
+  .play-pause-button.playing .pause-icon,
+  .play-pause-button:not(.playing):not(.loading) .play-icon {
+    display: block;
   }
 
   .progress {
@@ -101,7 +133,7 @@
 
   .progress-bar {
     width: 100%;
-    accent-color: var(--pine-green);
+    accent-color: var(--accent);
   }
 
   .buttons button {
@@ -111,6 +143,8 @@
 
   #current-time {
     visibility: hidden;
+    color: var(--text-muted);
+    font-size: 0.9rem;
   }
 
   .show-now-playing-button {
@@ -119,7 +153,6 @@
     right: 0rem;
     padding: 0.5rem;
     background-color: transparent;
-    color: var(--midnight-green);
     border: none;
     cursor: pointer;
     display: flex;
@@ -127,11 +160,30 @@
     align-items: center;
     aspect-ratio: 1;
     border-radius: 50%;
+    transition: transform 0.2s;
   }
 
-  .show-now-playing-button img {
+  .show-now-playing-button:hover {
+    transform: scale(1.1);
+  }
+
+  .eye-icon,
+  .eye-off-icon {
     width: 2rem;
-    stroke: var(--midnight-green);
+    height: 2rem;
+    color: var(--accent);
+  }
+
+  .show-now-playing-button .eye-off-icon {
+    display: none;
+  }
+
+  .show-now-playing-button.active .eye-icon {
+    display: none;
+  }
+
+  .show-now-playing-button.active .eye-off-icon {
+    display: block;
   }
 
   .show-player {
@@ -153,22 +205,22 @@
     // Player elements
     const player = document.getElementById("player") as HTMLAudioElement;
     const musicPlayerControls = document.querySelector(
-      ".music-player"
+      ".music-player",
     ) as HTMLElement;
     const progressBar = document.getElementById(
-      "progress-bar"
+      "progress-bar",
     ) as HTMLInputElement;
     const currentTimeSpan = document.getElementById(
-      "current-time"
+      "current-time",
     ) as HTMLSpanElement;
     const playerSection = document.getElementById(
-      "player-section"
+      "player-section",
     ) as HTMLElement;
     let isFirstPlay = true;
 
     // Episode buttons
     const episodePlayButtons = document.querySelectorAll(
-      ".play-button"
+      ".play-button",
     ) as NodeListOf<HTMLButtonElement>;
     let currentPlayingButton: HTMLButtonElement | null = null;
     let currentEpisodeId: string | null = null;
@@ -183,34 +235,34 @@
         listenedEpisodes.push(id);
         localStorage.setItem(
           "listenedEpisodes",
-          JSON.stringify(listenedEpisodes)
+          JSON.stringify(listenedEpisodes),
         );
       }
       document.dispatchEvent(
-        new CustomEvent("episodeListened", { detail: { id: id } })
+        new CustomEvent("episodeListened", { detail: { id: id } }),
       );
     };
 
     function updatePlayPauseState(isPlaying: boolean) {
       const playPauseButton = document.getElementById(
-        "play-pause"
+        "play-pause",
       ) as HTMLButtonElement;
-      const playPauseIcon = playPauseButton.querySelector("img");
 
-      if (playPauseIcon) {
-        playPauseIcon.src = isPlaying
-          ? "/icons/player-pause.svg"
-          : "/icons/player-play.svg";
-        playPauseIcon.alt = isPlaying ? "Icono de Pausa" : "Icono de Play";
+      if (playPauseButton) {
+        if (isPlaying) {
+          playPauseButton.classList.remove("loading");
+          playPauseButton.classList.add("playing");
+        } else {
+          playPauseButton.classList.remove("playing", "loading");
+        }
       }
 
       if (currentPlayingButton) {
-        const buttonIcon = currentPlayingButton.querySelector("img");
-        if (buttonIcon) {
-          buttonIcon.src = isPlaying
-            ? "/icons/player-pause.svg"
-            : "/icons/player-play.svg";
-          buttonIcon.alt = isPlaying ? "Icono de Pausa" : "Icono de Play";
+        if (isPlaying) {
+          currentPlayingButton.classList.remove("loading");
+          currentPlayingButton.classList.add("playing");
+        } else {
+          currentPlayingButton.classList.remove("playing", "loading");
         }
       }
     }
@@ -262,23 +314,14 @@
           player.pause();
 
           if (currentPlayingButton) {
-            const prevButtonIcon = currentPlayingButton.querySelector("img");
-            if (prevButtonIcon) {
-              prevButtonIcon.src = "/icons/player-play.svg";
-              prevButtonIcon.alt = "Icono de Play";
-            }
+            currentPlayingButton.classList.remove("playing", "loading");
           }
           currentPlayingButton = clickedButton;
           currentEpisodeId = episodeId;
-
-          const buttonIcon = currentPlayingButton.querySelector("img");
-          if (buttonIcon) {
-            buttonIcon.src = "/icons/loader.svg";
-            buttonIcon.alt = "Cargando...";
-          }
+          currentPlayingButton.classList.add("loading");
 
           const nowPlayingTitle = document.getElementById(
-            "now-playing-title"
+            "now-playing-title",
           ) as HTMLElement;
 
           nowPlayingTitle.textContent =
@@ -289,25 +332,45 @@
           player.load();
 
           // MediaSession API
-          if ('mediaSession' in navigator) {
+          if ("mediaSession" in navigator) {
             navigator.mediaSession.metadata = new MediaMetadata({
               title: nowPlayingTitle.textContent,
-              artist: 'NBA Mínimo de Veterano', // Hardcoded for now, can be dynamic if needed
-              album: 'Podcast',
+              artist: "NBA Mínimo de Veterano", // Hardcoded for now, can be dynamic if needed
+              album: "Podcast",
               artwork: [
-                { src: '/cover.webp', sizes: '96x96', type: 'image/webp' },
-                { src: '/cover.webp', sizes: '128x128', type: 'image/webp' },
-                { src: '/cover.webp', sizes: '192x192', type: 'image/webp' },
-                { src: '/cover.webp', sizes: '256x256', type: 'image/webp' },
-                { src: '/cover.webp', sizes: '384x384', type: 'image/webp' },
-                { src: '/cover.webp', sizes: '512x512', type: 'image/webp' },
-              ]
+                { src: "/cover.webp", sizes: "96x96", type: "image/webp" },
+                { src: "/cover.webp", sizes: "128x128", type: "image/webp" },
+                { src: "/cover.webp", sizes: "192x192", type: "image/webp" },
+                { src: "/cover.webp", sizes: "256x256", type: "image/webp" },
+                { src: "/cover.webp", sizes: "384x384", type: "image/webp" },
+                { src: "/cover.webp", sizes: "512x512", type: "image/webp" },
+              ],
             });
 
-            navigator.mediaSession.setActionHandler('play', () => { player.play(); });
-            navigator.mediaSession.setActionHandler('pause', () => { player.pause(); });
-            navigator.mediaSession.setActionHandler('seekbackward', (details) => { player.currentTime = Math.max(0, player.currentTime - (details.seekOffset || 10)); });
-            navigator.mediaSession.setActionHandler('seekforward', (details) => { player.currentTime = Math.min(player.duration, player.currentTime + (details.seekOffset || 10)); });
+            navigator.mediaSession.setActionHandler("play", () => {
+              player.play();
+            });
+            navigator.mediaSession.setActionHandler("pause", () => {
+              player.pause();
+            });
+            navigator.mediaSession.setActionHandler(
+              "seekbackward",
+              (details) => {
+                player.currentTime = Math.max(
+                  0,
+                  player.currentTime - (details.seekOffset || 10),
+                );
+              },
+            );
+            navigator.mediaSession.setActionHandler(
+              "seekforward",
+              (details) => {
+                player.currentTime = Math.min(
+                  player.duration,
+                  player.currentTime + (details.seekOffset || 10),
+                );
+              },
+            );
             // Add more handlers as needed, e.g., 'previoustrack', 'nexttrack'
           }
 
